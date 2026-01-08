@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     label = QLabel("Text to test")
     label.setStyleSheet("font-size: 50px;")
-    window.v_layout.addWidget(label)
+    window.addWidgetVLayout(label)
     window.adjustFixedSize()
 
     window.show()
