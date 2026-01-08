@@ -5,7 +5,7 @@ class MainWindow(QMainWindow):
         super().__init__(parent, *args, **kwargs)
 
         self.cw = QWidget()
-        self.v_layout = QVBoxLayout()
+        self.vLayout = QVBoxLayout()
         self.cw.setLayout(self.v_layout)
         self.setCentralWidget(self.cw)
 
