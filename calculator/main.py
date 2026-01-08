@@ -2,7 +2,9 @@ import sys
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QLabel
 from main_window import MainWindow
-from utils import ICON_PATH, windowsIconVerifier
+from utils import windowsIconVerifier
+from variables import ICON_PATH
+from display import Display
 
 
 if __name__ == "__main__":
@@ -15,10 +17,9 @@ if __name__ == "__main__":
     window.setWindowIcon(icon)
     app.setWindowIcon(icon)
 
-    label = QLabel("Text to test")
-    label.setStyleSheet("font-size: 50px;")
-    window.addWidgetVLayout(label)
-    window.adjustFixedSize()
+    display = Display()
+    window.addWidgetVLayout(display)
 
+    window.adjustFixedSize()    
     window.show()
     app.exec()
