@@ -4,11 +4,11 @@ from PySide6.QtWidgets import QApplication, QLabel
 from main_window import MainWindow
 from utils import windowsIconVerifier
 from variables import ICON_PATH
-from display import Display
+from display import Display, OperationDisplay
 
 
 if __name__ == "__main__":
-    windowsIconVerifier() # to change the icon on the taskbar in Windows
+    windowsIconVerifier() # to change the icon on the taskbar on Windows
     app = QApplication(sys.argv)
     window = MainWindow()
 
@@ -16,6 +16,9 @@ if __name__ == "__main__":
     icon = QIcon(str(ICON_PATH))
     window.setWindowIcon(icon)
     app.setWindowIcon(icon)
+
+    opDisplay = OperationDisplay("2.00 ^ 10.00 = 1024")
+    window.addWidgetVLayout(opDisplay)
 
     display = Display()
     window.addWidgetVLayout(display)
