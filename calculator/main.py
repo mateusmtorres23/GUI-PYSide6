@@ -5,11 +5,13 @@ from main_window import MainWindow
 from utils import windowsIconVerifier
 from variables import ICON_PATH
 from display import Display, OperationDisplay
+from styles import setupTheme
 
 
 if __name__ == "__main__":
     windowsIconVerifier() # to change the icon on the taskbar on Windows
     app = QApplication(sys.argv)
+    setupTheme(app)
     window = MainWindow()
 
 
