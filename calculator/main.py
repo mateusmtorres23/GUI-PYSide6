@@ -6,6 +6,7 @@ from utils import windowsIconVerifier
 from variables import ICON_PATH
 from display import Display, OperationDisplay
 from styles import setupTheme
+from buttons import Button, ButtonGrid
 
 
 if __name__ == "__main__":
@@ -13,7 +14,6 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     setupTheme(app)
     window = MainWindow()
-
 
     icon = QIcon(str(ICON_PATH))
     window.setWindowIcon(icon)
@@ -24,6 +24,15 @@ if __name__ == "__main__":
 
     display = Display()
     window.addWidgetVLayout(display)
+
+    buttonGrid = ButtonGrid()
+    window.vLayout.addLayout(buttonGrid)
+
+    button = Button("Texto do botão")
+    buttonGrid.addWidget(button)
+
+    button2 = Button("Texto do botão")
+    buttonGrid.addWidget(button2)
 
     window.adjustFixedSize()    
     window.show()
