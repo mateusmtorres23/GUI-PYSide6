@@ -28,12 +28,6 @@ if __name__ == "__main__":
     buttonGrid = ButtonGrid()
     window.vLayout.addLayout(buttonGrid)
 
-    button = Button("Texto do botão")
-    buttonGrid.addWidget(button)
-
-    button2 = Button("Texto do botão")
-    buttonGrid.addWidget(button2)
-
     window.adjustFixedSize()    
     window.show()
     app.exec()
