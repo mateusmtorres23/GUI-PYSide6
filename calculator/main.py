@@ -19,7 +19,7 @@ if __name__ == "__main__":
     window.setWindowIcon(icon)
     app.setWindowIcon(icon)
 
-    opDisplay = OperationDisplay("2.00 ^ 10.00 = 1024")
+    opDisplay = OperationDisplay('')
     window.addWidgetVLayout(opDisplay)
 
     display = Display()

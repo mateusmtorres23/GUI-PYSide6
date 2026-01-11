@@ -1,3 +1,4 @@
+from tkinter import NO
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QPushButton, QGridLayout
 from display import Display, OperationDisplay
@@ -26,6 +27,9 @@ class ButtonGrid(QGridLayout):
         self.display = display
         self.opDisplay = opDisplay
         self._equation = ""
+        self._operator = None
+        self._left = None
+        self._right = None
         self._makeGrid()
 
     @property
@@ -64,6 +68,10 @@ class ButtonGrid(QGridLayout):
         if text == "C":
             self._connectButtonClicked(button, self.display.clear)
 
+        if text in "+-*÷":
+            slot = self._makeButtonSlot(self._operatorClicked, button)
+            self._connectButtonClicked(button, slot)
+
     def _connectButtonClicked(self, button, slot):
         button.clicked.connect(slot)
 
@@ -81,3 +89,18 @@ class ButtonGrid(QGridLayout):
             return
 
         self.display.insert(buttonText)
+    
+    def _operatorClicked(self, button):
+        displayText = self.display.text()
+
+        if not isValidNumber(displayText):
+            return
+
+        self.opDisplay.setText(f'{displayText} {button.text()}')
+        self.display.clear()
+
+        if self._left is None:
+            self._left = float(displayText)
+
+        self._op = button.text()
+        self.equation = f'{self._left} {self._op}'
