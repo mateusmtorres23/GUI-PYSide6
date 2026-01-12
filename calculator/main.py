@@ -6,7 +6,7 @@ from utils import windowsIconVerifier
 from variables import ICON_PATH
 from display import Display, OperationDisplay
 from styles import setupTheme
-from buttons import Button, ButtonGrid
+from buttons import ButtonGrid
 
 
 if __name__ == "__main__":

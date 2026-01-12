@@ -58,6 +58,7 @@ class ButtonGrid(QGridLayout):
                     button.setProperty("cssClass", "specialButton")
                     self._configSpecialButton(button)
 
+
                 slot = self._makeButtonSlot(self._insertButtonTextToDisplay, button)
                 self._connectButtonClicked(button, slot)
                 self.addWidget(button, i, j, 1, columnSpan)
@@ -66,11 +67,16 @@ class ButtonGrid(QGridLayout):
         text = button.text()
 
         if text == "C":
-            self._connectButtonClicked(button, self.display.clear)
+            self._connectButtonClicked(button, self._clear)
 
         if text in "+-*÷":
             slot = self._makeButtonSlot(self._operatorClicked, button)
             self._connectButtonClicked(button, slot)
+        
+        if text == "=":
+            slot = self._makeButtonSlot(self._equalsTo)
+            self._connectButtonClicked(button, slot)
+
 
     def _connectButtonClicked(self, button, slot):
         button.clicked.connect(slot)
@@ -93,14 +99,50 @@ class ButtonGrid(QGridLayout):
     def _operatorClicked(self, button):
         displayText = self.display.text()
 
+        if not isValidNumber(displayText) and self._left is None:
+            return
+
+        self.display.clear()
+
+        if displayText:
+            self._left = float(displayText)
+        
+        if self._left.is_integer():
+            self._left = int(self._left)
+
+        self._op =  button.text() 
+        self.equation = f'{self._left} {self._op}'
+
+    def _clear(self):
+        self._left = None
+        self._right = None
+        self._op = None
+        self.equation = ""
+        self.display.clear()
+
+    def _equalsTo(self):
+        if not self._left and self._op:
+            return
+        
+        displayText = self.display.text()
+
         if not isValidNumber(displayText):
             return
 
-        self.opDisplay.setText(f'{displayText} {button.text()}')
+        self._right = float(displayText)
+        
+        if self._right.is_integer():
+            self._right = int(self._right)
+
+        self.equation = f'{self._left} {self._op} {self._right}'
+        result = 0
+
+        try:
+            result = eval(f'{self._left} / {self._right}') if self._op == '÷' else eval(self.equation)
+        except ZeroDivisionError:
+            print('Zero Division Error')
+        
         self.display.clear()
-
-        if self._left is None:
-            self._left = float(displayText)
-
-        self._op = button.text()
-        self.equation = f'{self._left} {self._op}'
+        self.opDisplay.setText(f'{self.equation} = {result}')
+        self._left = result
+        self._right = None
