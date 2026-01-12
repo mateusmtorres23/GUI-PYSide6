@@ -1,9 +1,9 @@
-from tkinter import NO
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QPushButton, QGridLayout
 from display import Display, OperationDisplay
 from variables import MEDIUM_FONT_SIZE
 from utils import isValidNumber
+import operator as opr
 
 class Button(QPushButton):
     def __init__(self, *args, **kwargs):
@@ -69,7 +69,7 @@ class ButtonGrid(QGridLayout):
         if text == "C":
             self._connectButtonClicked(button, self._clear)
 
-        if text in "+-*÷":
+        if text in "+-*÷^":
             slot = self._makeButtonSlot(self._operatorClicked, button)
             self._connectButtonClicked(button, slot)
         
@@ -97,6 +97,7 @@ class ButtonGrid(QGridLayout):
         self.display.insert(buttonText)
     
     def _operatorClicked(self, button):
+
         displayText = self.display.text()
 
         if not isValidNumber(displayText) and self._left is None:
@@ -137,8 +138,16 @@ class ButtonGrid(QGridLayout):
         self.equation = f'{self._left} {self._op} {self._right}'
         result = 0
 
+        opMap = {
+            '+' : opr.add(self._left, self._right),
+            '-' : opr.sub(self._left, self._right),
+            '*' : opr.mul(self._left, self._right),
+            '÷' : opr.truediv(self._left, self._right),
+            '^' : opr.pow(self._left, self._right)
+        }
+
         try:
-            result = eval(f'{self._left} / {self._right}') if self._op == '÷' else eval(self.equation)
+            result = opMap[self._op]
         except ZeroDivisionError:
             print('Zero Division Error')
         
