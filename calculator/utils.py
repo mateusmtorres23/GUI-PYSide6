@@ -15,3 +15,8 @@ def isValidNumber(string: str) -> bool:
     except ValueError:
         valid = False
     return valid
+
+def isNumOrDot(chr) -> bool:
+    if chr in '0123456789.':
+        return True
+    return False
