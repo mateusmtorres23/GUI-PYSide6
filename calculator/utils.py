@@ -1,4 +1,5 @@
 import sys
+from PySide6.QtCore import Qt
 
 def windowsIconVerifier():
     if sys.platform.startswith('win'):

@@ -1,4 +1,4 @@
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Slot, Qt
 from PySide6.QtWidgets import QPushButton, QGridLayout
 from display import Display, OperationDisplay
 from variables import MEDIUM_FONT_SIZE
@@ -22,7 +22,7 @@ class ButtonGrid(QGridLayout):
             ['7', '8', '9', '*'],
             ['4', '5', '6', '-'],
             ['1', '2', '3', '+'],
-            ['0', None, '.', '='],
+            ['(- )', '0', '.', '='],
         ]
         self.display = display
         self.opDisplay = opDisplay
@@ -42,15 +42,16 @@ class ButtonGrid(QGridLayout):
         self.opDisplay.setText(value)
 
     def _makeGrid(self):
-        zeroSpan = {'0' : 2}
+
+        self.display.arrowSignal.connect(self._arrowPressed)
+        self.display.delSignal.connect(self.display.backspace)
+        self.display.inputSignal.connect(self._insertToDisplay)
+        self.display.operatorSignal.connect(self._operatorConfig)
+        self.display.eqSignal.connect(self._equalsTo)
+
 
         for i, row in enumerate(self._gridMask):
             for j, element in enumerate(row):
-
-                if element is None:
-                    continue
-
-                columnSpan = zeroSpan.get(element, 1)
 
                 button = Button(element)
 
@@ -59,9 +60,9 @@ class ButtonGrid(QGridLayout):
                     self._configSpecialButton(button)
 
 
-                slot = self._makeButtonSlot(self._insertButtonTextToDisplay, button)
+                slot = self._makeButtonSlot(self._insertToDisplay, element)
                 self._connectButtonClicked(button, slot)
-                self.addWidget(button, i, j, 1, columnSpan)
+                self.addWidget(button, i, j, 1, 1)
     
     def _configSpecialButton(self, button):
         text = button.text()
@@ -74,13 +75,16 @@ class ButtonGrid(QGridLayout):
 
 
         if text in "+-*÷^":
-            slot = self._makeButtonSlot(self._operatorClicked, button)
+            slot = self._makeButtonSlot(self._operatorConfig, text)
             self._connectButtonClicked(button, slot)
         
         if text == "=":
             slot = self._makeButtonSlot(self._equalsTo)
             self._connectButtonClicked(button, slot)
 
+        if text == "(- )":
+            slot = self._makeButtonSlot(self._invertNumber)
+            self._connectButtonClicked(button, slot)
 
     def _connectButtonClicked(self, button, slot):
         button.clicked.connect(slot)
@@ -90,17 +94,18 @@ class ButtonGrid(QGridLayout):
         def realSlot():
             func(*args, **kwargs)
         return realSlot
-                
-    def _insertButtonTextToDisplay(self, button):
-        buttonText = button.text()
-        newDisplayValue = self.display.text() + buttonText
+    
+    @Slot()
+    def _insertToDisplay(self, text):
+        newDisplayValue = self.display.text() + text
 
         if not isValidNumber(newDisplayValue):
             return
 
-        self.display.insert(buttonText)
+        self.display.insert(text)
     
-    def _operatorClicked(self, button):
+    @Slot()
+    def _operatorConfig(self, text):
 
         displayText = self.display.text()
 
@@ -115,9 +120,25 @@ class ButtonGrid(QGridLayout):
         if self._left.is_integer():
             self._left = int(self._left)
 
-        self._op =  button.text() 
+        self._op =  text
         self.equation = f'{self._left} {self._op}'
 
+    @Slot()
+    def _invertNumber(self):
+        text = self.display.text()
+
+        if not isValidNumber(text):
+            return
+
+        number = float(text)
+        newNumber = number * -1
+        
+        if newNumber.is_integer():
+            newNumber = int(newNumber)
+
+        self.display.setText(str(newNumber))
+
+    @Slot()
     def _clear(self):
         self._left = None
         self._right = None
@@ -125,8 +146,9 @@ class ButtonGrid(QGridLayout):
         self.equation = ""
         self.display.clear()
 
+    @Slot()
     def _equalsTo(self):
-        if not self._left and self._op:
+        if self._left is None or self._op is None:
             return
         
         displayText = self.display.text()
@@ -143,19 +165,37 @@ class ButtonGrid(QGridLayout):
         result = 0
 
         opMap = {
-            '+' : opr.add(self._left, self._right),
-            '-' : opr.sub(self._left, self._right),
-            '*' : opr.mul(self._left, self._right),
-            '÷' : opr.truediv(self._left, self._right),
-            '^' : opr.pow(self._left, self._right)
+            '+' : opr.add,
+            '-' : opr.sub,
+            '*' : opr.mul,
+            '÷' : opr.truediv,
+            '^' : opr.pow
         }
 
         try:
-            result = opMap[self._op]
+            operation = opMap[self._op]
+            result = operation(self._left, self._right)
         except ZeroDivisionError:
+            self.display.setText("Error")
             print('Zero Division Error')
         
         self.display.clear()
         self.opDisplay.setText(f'{self.equation} = {result}')
         self._left = result
         self._right = None
+    
+    @Slot(int)
+    def _arrowPressed(self, keyCode):
+        KEYS = Qt.Key
+
+        if keyCode == KEYS.Key_Up:
+            self.display.setCursorPosition(0)
+
+        elif keyCode == KEYS.Key_Down:
+            self.display.setCursorPosition(len(self.display.text()))
+
+        elif keyCode == KEYS.Key_Left:
+            self.display.cursorBackward(False)
+
+        elif keyCode == KEYS.Key_Right:
+            self.display.cursorForward(False)
